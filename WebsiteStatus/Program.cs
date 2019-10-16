@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -16,25 +13,24 @@ namespace WebsiteStatus
             Log.Logger = new LoggerConfiguration()  
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.Debug()
                 .WriteTo.File(@"C:\temp\workerservice\LogFile.txt")
-                .CreateLogger();       // Configures Serilog which will override the default logger
+                .Enrich.FromLogContext()
+                .CreateLogger();
 
             try
             {
                 Log.Information("Starting up the service");
                 CreateHostBuilder(args).Build().Run();
-                return;
             }
             catch (Exception ex)
             {
                 Log.Fatal(ex, "There was a problem starting the service");
-                return;
             }
             finally
             {
-                Log.CloseAndFlush();  // runs whether try or catch if there is any message left in the buffer then they get written before closing the application
-                // therefore we call this to make sure we write even if it crashes
+                Log.CloseAndFlush();
             }
             
         }
