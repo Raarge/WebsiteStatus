@@ -10,12 +10,12 @@ namespace WebsiteStatus
     {
         public static void Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()  
+            Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .WriteTo.Console()
                 .WriteTo.Debug()
-                .WriteTo.File(@"C:\temp\workerservice\LogFile.txt")
+                .WriteTo.File(@"C:\temp\WorkerService\LogFile.txt")
                 .Enrich.FromLogContext()
                 .CreateLogger();
 
@@ -32,7 +32,7 @@ namespace WebsiteStatus
             {
                 Log.CloseAndFlush();
             }
-            
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args)

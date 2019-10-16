@@ -33,8 +33,8 @@ namespace WebsiteStatus
             while (!stoppingToken.IsCancellationRequested)
             {
                 const string website = "https://www.raarge.com";
-                var result = await _client.GetAsync("https://www.raarge.com");
-                
+                var result = await _client.GetAsync(website, stoppingToken);
+
                 if (result.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("The website was up. Status code {StatusCode} [{Website}]", result.StatusCode, website);
