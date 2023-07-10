@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +9,7 @@ namespace WebsiteStatus
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private HttpClient client;    // only open 1 client for the application otherwise can clog connections and crash computer
+        private HttpClient _client;
 
         public Worker(ILogger<Worker> logger)
         {
@@ -21,13 +18,13 @@ namespace WebsiteStatus
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            client = new HttpClient();   // starts when the service starts
+            _client = new HttpClient();
             return base.StartAsync(cancellationToken);
         }
 
-        public override Task StopAsync(CancellationToken cancellationToken)  // call this when we stop the service
+        public override Task StopAsync(CancellationToken cancellationToken)
         {
-            client.Dispose();   // cleaning the connections up and shut down the client
+            _client.Dispose();
             return base.StopAsync(cancellationToken);
         }
 
@@ -35,19 +32,18 @@ namespace WebsiteStatus
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var result = await client.GetAsync("https://www.raarge.com");    // make the call here to our website  Note: this will wait until the site loads then it will move to next counter
-                
+                const string website = "https://www.raarge.com";
+                var result = await _client.GetAsync(website, stoppingToken);
+
                 if (result.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation("The website was up. Status code {StatusCode}", result.StatusCode);
+                    _logger.LogInformation("The website was up. Status code {StatusCode} [{Website}]", result.StatusCode, website);
                 }
                 else
                 {
-                    _logger.LogError("The website is down. Status code {StatusCode}", result.StatusCode);   // this only a log
-                    // here you would send an email to the person letting them know it is down.  (Perform an Action here)
+                    _logger.LogError("The website is down. Status code {StatusCode} [{Website}]", result.StatusCode, website);
                 }
-                //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);  //writing to log
-                await Task.Delay(5 * 1000, stoppingToken);  // waiting 1 second and restarting the loop.   the task.delay is our control
+                await Task.Delay(5 * 1000, stoppingToken);
             }
         }
     }
